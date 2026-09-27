@@ -24,29 +24,57 @@ def probe(p):
                                           "-of", "csv=p=0", str(p)]).decode())
 
 
+def paragraphs():
+    t = (HERE / "narration.md").read_text().split("---", 1)[1].strip()
+    return [x.strip() for x in t.split("\n\n") if x.strip()]
+
+
 def speech_segments(wav):
-    """Spoken spans between pauses (silencedetect), merged until there is one per scene."""
-    log = subprocess.run(["ffmpeg", "-i", str(wav), "-af", "silencedetect=noise=-40dB:d=0.9", "-f", "null", "-"],
+    """One spoken span per scene. Each scene break is the pause closest to where the script says it
+    should fall (by characters spoken so far), so a dramatic pause mid-scene ("Why Monad? …") never
+    splits a scene and a short pause between scenes is still found."""
+    log = subprocess.run(["ffmpeg", "-i", str(wav), "-af", "silencedetect=noise=-40dB:d=0.35", "-f", "null", "-"],
                          capture_output=True, text=True).stderr
     starts = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", log)]
     ends = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", log)]
     total = probe(wav)
-    segs, cur = [], 0.0
-    for s, e in zip(starts, ends):
-        if s - cur > 0.25:
-            segs.append([cur, s])
-        cur = e
-    if total - cur > 0.25:
-        segs.append([cur, total])
-    # too many (a mid-sentence pause)? join across the shortest gaps
-    while len(segs) > len(SCENES):
-        gaps = [segs[i + 1][0] - segs[i][1] for i in range(len(segs) - 1)]
-        i = gaps.index(min(gaps))
-        segs[i] = [segs[i][0], segs[i + 1][1]]
-        del segs[i + 1]
-    if len(segs) != len(SCENES):
-        sys.exit(f"found {len(segs)} spoken lines for {len(SCENES)} scenes — check the pauses in {wav}")
-    return segs
+    lead = next((e for s, e in zip(starts, ends) if s < 0.05), 0.0)
+    tail = next((s for s, e in zip(starts, ends) if e >= total - 0.05), total)
+    gaps = [(s, e) for s, e in zip(starts, ends) if lead + 0.3 < s and e < tail - 0.3]
+    paras = paragraphs()
+    if len(paras) != len(SCENES):
+        sys.exit(f"narration.md has {len(paras)} paragraphs for {len(SCENES)} scenes")
+    chars = [len(p) for p in paras]
+    speech = tail - lead
+    want, acc = [], 0
+    for c in chars[:-1]:
+        acc += c
+        want.append(lead + speech * acc / sum(chars))
+    n = len(want)
+    # 1) pauses of 1.2 s+ are the <long pause> tags: certain scene breaks. Fit them to breaks in order.
+    long_ = [g for g in gaps if g[1] - g[0] >= 1.2][:n]
+    assign = {}
+    k0 = 0
+    for g in long_:
+        mid = (g[0] + g[1]) / 2
+        left = n - k0 - (len(long_) - len(assign))  # breaks we may still skip
+        k = min(range(k0, k0 + left + 1), key=lambda j: abs(want[j] - mid))
+        assign[k] = g
+        k0 = k + 1
+    # 2) the rest: the best pause between the neighbouring certain breaks
+    for k in range(n):
+        if k in assign:
+            continue
+        lo = max([assign[j][1] for j in assign if j < k], default=lead)
+        hi = min([assign[j][0] for j in assign if j > k], default=tail)
+        cand = [g for g in gaps if lo < g[0] and g[1] < hi and g not in assign.values()]
+        if not cand:
+            sys.exit(f"no pause found for scene break {k + 1}")
+        assign[k] = min(cand, key=lambda g: abs((g[0] + g[1]) / 2 - want[k]) - 1.0 * (g[1] - g[0]))
+    cuts = [assign[k] for k in range(n)]
+    cuts.sort()
+    bounds = [lead] + [x for g in cuts for x in g] + [tail]
+    return [[bounds[i], bounds[i + 1]] for i in range(0, len(bounds), 2)]
 
 
 def scene_video(name, dur):
