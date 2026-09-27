@@ -7,3 +7,6 @@ broadcast/*/31337/
 .env.*
 !.env.example
 .DS_Store
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
