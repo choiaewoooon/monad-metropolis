@@ -23,6 +23,20 @@ export type Receipt = { pocketId: bigint; merchant: Address; amount: bigint; at:
 const domain = { name: "Kirogi", version: "1", chainId: chain.id, verifyingContract: KIROGI } as const;
 const deadline = () => BigInt(Math.floor(Date.now() / 1000) + 600);
 
+const versionAbi = [{ type: "function", name: "version", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] }] as const;
+
+/** The token's EIP-712 domain: USDC says version "2", AUSD and OpenZeppelin tokens publish eip712Domain(). */
+export async function permitDomain() {
+  try {
+    const d = await pub.readContract({ address: DOLLAR, abi: testUSDAbi, functionName: "eip712Domain" });
+    return { name: d[1], version: d[2], chainId: Number(d[3]), verifyingContract: d[4] };
+  } catch {
+    const name = await pub.readContract({ address: DOLLAR, abi: testUSDAbi, functionName: "name" });
+    const version = await pub.readContract({ address: DOLLAR, abi: versionAbi, functionName: "version" }).catch(() => "1");
+    return { name, version, chainId: chain.id, verifyingContract: DOLLAR };
+  }
+}
+
 export async function balanceOf(a: Address) {
   return pub.readContract({ address: DOLLAR, abi: testUSDAbi, functionName: "balanceOf", args: [a] });
 }
@@ -71,12 +85,12 @@ export async function signSend(you: PrivateKeyAccount, recipient: Address, parts
     message: { sender: you.address, recipient, partsHash, lifetime, nonce: await nonce(you.address), deadline: dl },
   });
   // EIP-2612 permit so a brand-new passkey account never sends an approve transaction
-  const [permitNonce, tokenName] = await Promise.all([
+  const [permitNonce, tokenDomain] = await Promise.all([
     pub.readContract({ address: DOLLAR, abi: testUSDAbi, functionName: "nonces", args: [you.address] }),
-    pub.readContract({ address: DOLLAR, abi: testUSDAbi, functionName: "name" }),
+    permitDomain(),
   ]);
   const permitSig = await you.signTypedData({
-    domain: { name: tokenName, version: "1", chainId: chain.id, verifyingContract: DOLLAR },
+    domain: tokenDomain,
     primaryType: "Permit",
     types: { Permit: [
       { name: "owner", type: "address" }, { name: "spender", type: "address" }, { name: "value", type: "uint256" },

@@ -3,23 +3,23 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Top, useSignedIn } from "@/components/Top";
-import { placeById, purposeId, txUrl, type Purpose } from "@/lib/config";
+import { DEMO_FUND, placeById, purposeId, txUrl, type Purpose } from "@/lib/config";
 import { balanceOf, fmt, relay, signSend, toUnits, type Part, type RelayResult } from "@/lib/kirogi";
 import { short } from "@/lib/util";
 
 type Row = { purpose: Purpose; label: string; rule: 0 | 1; payee?: string; note: string; amount: number };
 
 const DEFAULT_ROWS: Row[] = [
-  { purpose: "TUITION", label: "Tuition", rule: 1, payee: "westwood-academy", note: "Westwood Academy only", amount: 1200 },
-  { purpose: "RENT", label: "Rent", rule: 1, payee: "landlord", note: "your landlord only", amount: 500 },
-  { purpose: "GROCERIES", label: "Groceries", rule: 0, note: "grocery stores", amount: 300 },
+  { purpose: "TUITION", label: "Tuition", rule: 1, payee: "westwood-academy", note: "Westwood Academy only", amount: 6 },
+  { purpose: "RENT", label: "Rent", rule: 1, payee: "landlord", note: "your landlord only", amount: 2.5 },
+  { purpose: "GROCERIES", label: "Groceries", rule: 0, note: "grocery stores", amount: 1.5 },
 ];
-const STEP = 50;
+const STEP = 0.5;
 
 export default function Send() {
   const accounts = useSignedIn();
   const [step, setStep] = useState<"amount" | "earmark" | "sending" | "done">("amount");
-  const [amount, setAmount] = useState("2000");
+  const [amount, setAmount] = useState(String(DEMO_FUND));
   const [rows, setRows] = useState<Row[]>(DEFAULT_ROWS);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [result, setResult] = useState<RelayResult | null>(null);
@@ -34,8 +34,8 @@ export default function Send() {
     funding.current = true;
     (async () => {
       let b = await balanceOf(accounts.you.address);
-      if (b < toUnits(500)) {
-        await relay("fund", { to: accounts.you.address }); // demo dollars on testnet
+      if (b < toUnits(DEMO_FUND)) {
+        await relay("fund", { to: accounts.you.address }); // demo dollars: official testnet USDC from the float
         b = await balanceOf(accounts.you.address);
       }
       setBalance(b);
@@ -46,13 +46,13 @@ export default function Send() {
   useEffect(() => {
     if (!total) return;
     const base = DEFAULT_ROWS.reduce((s, r) => s + r.amount, 0);
-    const next = DEFAULT_ROWS.map((r) => ({ ...r, amount: Math.round((r.amount / base) * total) }));
-    next[next.length - 1].amount += total - next.reduce((s, r) => s + r.amount, 0);
+    const next = DEFAULT_ROWS.map((r) => ({ ...r, amount: Math.round((r.amount / base) * total * 2) / 2 }));
+    next[next.length - 1].amount = Math.round((next[next.length - 1].amount + total - next.reduce((s, r) => s + r.amount, 0)) * 100) / 100;
     setRows(next);
   }, [total]);
 
   const press = (k: string) =>
-    setAmount((a) => (k === "⌫" ? a.slice(0, -1) : (a + k).replace(/^0+(?=\d)/, "").slice(0, 6)));
+    setAmount((a) => (k === "⌫" ? a.slice(0, -1) : (a + k).replace(/^0+(?=\d)/, "").slice(0, 4)));
 
   const nudge = (i: number, d: number) =>
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, amount: Math.max(0, r.amount + d) } : r)));
@@ -124,7 +124,7 @@ export default function Send() {
                   <span style={{ fontSize: 16 }}>{r.label}</span>
                   <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <button className="nudge" aria-label={`Less for ${r.label}`} onClick={() => nudge(i, -STEP)}>−</button>
-                    <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em", minWidth: 72, textAlign: "right" }}>{fmt(r.amount, false)}</span>
+                    <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em", minWidth: 72, textAlign: "right" }}>{fmt(r.amount)}</span>
                     <button className="nudge" aria-label={`More for ${r.label}`} onClick={() => nudge(i, STEP)}>+</button>
                   </span>
                 </div>
@@ -134,12 +134,12 @@ export default function Send() {
             ))}
           </div>
           <p className="mono" style={{ marginTop: 14, color: assigned === total ? "var(--faint)" : "var(--home)" }}>
-            {assigned === total ? "Unspent after 30 days comes back to you." : `${fmt(total - assigned, false)} not assigned yet`}
+            {Math.abs(assigned - total) < 0.001 ? "Unspent after 30 days comes back to you." : `${fmt(total - assigned)} not assigned yet`}
           </p>
           {err && <p className="error">{err}</p>}
         </div>
         <div className="grow" />
-        <button className="btn" disabled={assigned !== total} onClick={send}>Send {fmt(total, false)}</button>
+        <button className="btn" disabled={Math.abs(assigned - total) > 0.001} onClick={send}>Send {fmt(total, false)}</button>
       </>
     );
 

@@ -11,7 +11,7 @@ type Lane = { purpose: string; left: bigint; ids: bigint[] };
 type Scanned = { place: Place; amount: string };
 
 const DEFAULT_AMOUNT: Record<string, string> = {
-  "westwood-market": "86.40", "corner-pharmacy": "24.90", "neon-arcade": "60.00", "westwood-academy": "1200.00", landlord: "500.00",
+  "westwood-market": "0.86", "corner-pharmacy": "0.49", "neon-arcade": "0.60", "westwood-academy": "6.00", landlord: "2.50",
 };
 
 export default function Family() {

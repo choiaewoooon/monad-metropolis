@@ -36,11 +36,14 @@ export const labelOf = (id: string): string => {
   return hit ? PURPOSE_LABEL[hit] : "Other";
 };
 
-/** Same derivation as script/Deploy.s.sol: vm.addr(uint256(keccak256(label))). */
-const demoAddress = (label: string): Address => privateKeyToAddress(keccak256(toBytes(label)));
+/** Same derivation as script/Deploy.s.sol: vm.addr(uint256(keccak256(label))).
+ * The keys are public on purpose — demo shops only. The relayer uses them to sweep demo dollars back. */
+export const demoKey = (label: string): Hex => keccak256(toBytes(label));
+const demoAddress = (label: string): Address => privateKeyToAddress(demoKey(label));
 
 export type Place = {
   id: string;
+  label: string;
   name: string;
   address: Address;
   /** registered merchant category, or null for a named payee (school, landlord) */
@@ -49,16 +52,20 @@ export type Place = {
 };
 
 export const PLACES: Place[] = [
-  { id: "westwood-market", name: "Westwood Market", kind: "Grocery store", category: "GROCERIES",
+  { id: "westwood-market", label: "kirogi.demo.merchant.westwood-market", name: "Westwood Market", kind: "Grocery store", category: "GROCERIES",
     address: demoAddress("kirogi.demo.merchant.westwood-market") },
-  { id: "corner-pharmacy", name: "Corner Pharmacy", kind: "Pharmacy", category: "PHARMACY",
+  { id: "corner-pharmacy", label: "kirogi.demo.merchant.corner-pharmacy", name: "Corner Pharmacy", kind: "Pharmacy", category: "PHARMACY",
     address: demoAddress("kirogi.demo.merchant.corner-pharmacy") },
-  { id: "neon-arcade", name: "Neon Arcade", kind: "Arcade", category: "ENTERTAINMENT",
+  { id: "neon-arcade", label: "kirogi.demo.merchant.neon-arcade", name: "Neon Arcade", kind: "Arcade", category: "ENTERTAINMENT",
     address: demoAddress("kirogi.demo.merchant.neon-arcade") },
-  { id: "westwood-academy", name: "Westwood Academy", kind: "School", category: null,
+  { id: "westwood-academy", label: "kirogi.demo.payee.westwood-academy", name: "Westwood Academy", kind: "School", category: null,
     address: demoAddress("kirogi.demo.payee.westwood-academy") },
-  { id: "landlord", name: "Landlord", kind: "Rent", category: null,
+  { id: "landlord", label: "kirogi.demo.payee.landlord", name: "Landlord", kind: "Rent", category: null,
     address: demoAddress("kirogi.demo.payee.landlord") },
 ];
 export const placeByAddress = (a: string) => PLACES.find((p) => p.address.toLowerCase() === a.toLowerCase());
 export const placeById = (id: string) => PLACES.find((p) => p.id === id);
+
+/** Demo scale. Testnet dollars are official (Circle USDC / Agora AUSD) and come from rate-limited faucets,
+ * so the demo moves ten dollars, not thousands. */
+export const DEMO_FUND = 10;

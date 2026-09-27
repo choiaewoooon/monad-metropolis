@@ -9,7 +9,7 @@ import { balanceOf, fmt } from "@/lib/kirogi";
 /** The shop's side: show a QR, watch the balance, say "Paid" the moment it lands. */
 export default function Shop() {
   const [placeId, setPlaceId] = useState("westwood-market");
-  const [amount, setAmount] = useState("86.40");
+  const [amount, setAmount] = useState("0.86");
   const [qr, setQr] = useState("");
   const [paid, setPaid] = useState<{ amount: number; ms: number } | null>(null);
   const shown = useRef<{ at: number; balance: bigint } | null>(null);
