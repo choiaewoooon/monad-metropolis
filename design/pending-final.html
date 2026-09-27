@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kirogi — Payment in flight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--ink:#08090c;--line:#1d2029;--text:#f2f4f7;--dim:#9aa2b1;--faint:#737d8e;--home:#f0b36b;--pass:#46cf95;--fail:#ff6b6b;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box}body{margin:0;width:1560px;height:900px;background:#030406;color:var(--text);font-family:Archivo,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}header.board{width:1132px;margin:0 auto;height:88px;display:flex;align-items:center;justify-content:space-between}.board strong{font-size:18px;font-weight:500;letter-spacing:-.04em}.board span,.caption{font:10px var(--mono);color:var(--faint);letter-spacing:.09em}main{display:flex;gap:56px;justify-content:center}figure{margin:0;width:340px}.phone{height:700px;width:340px;padding:7px;border:1px solid #2a2e38;border-radius:43px;background:#14161c;box-shadow:0 16px 48px #0005}.screen{height:100%;border-radius:35px;background:var(--ink);overflow:hidden;position:relative;padding:0 22px;--accent:var(--home)}.screen[data-state=paid]{--accent:var(--pass)}.screen[data-state=refused]{--accent:var(--fail)}.statusbar{height:45px;display:flex;align-items:center;justify-content:space-between;padding:0 2px;font-size:11px;font-weight:600}.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:88px;height:23px;border-radius:20px;background:#000}.status-icons{display:flex;align-items:center;gap:5px}.signal{width:12px;height:10px;background:linear-gradient(to right,transparent 20%,var(--text) 20% 35%,transparent 35% 45%,var(--text) 45% 65%,transparent 65% 75%,var(--text) 75%);clip-path:polygon(0 80%,25% 80%,25% 55%,50% 55%,50% 30%,75% 30%,75% 0,100% 0,100% 100%,0 100%)}.battery{width:19px;height:9px;border:1px solid #9aa2b1;border-radius:2px;padding:1px;position:relative}.battery:before{content:'';display:block;background:var(--text);height:100%;width:90%}.battery:after{content:'';position:absolute;width:2px;height:3px;background:var(--dim);right:-4px;top:2px}.nav{height:38px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:19px;font-weight:600;letter-spacing:-.05em}.eyebrow{font:9px var(--mono);letter-spacing:.14em;color:var(--dim)}h1{font-size:28px;letter-spacing:-.045em;line-height:1.12;font-weight:600;margin:21px 0 8px;white-space:nowrap}.amount{font-size:14px;margin:0;color:var(--dim)}.amount b{font:14px var(--mono);font-weight:400;color:var(--text)}.amount span{margin:0 6px;color:var(--faint)}.timer{margin-top:28px}.clock{display:flex;align-items:baseline;gap:9px;font:500 66px/1.16 var(--mono);letter-spacing:-.07em;color:var(--accent);margin-top:4px}.clock small{font-size:26px;font-weight:400;letter-spacing:-.03em}.crossing{margin-top:23px}.ends{display:flex;justify-content:space-between;align-items:center;font-size:12px}.payer{color:var(--home)}.shop{color:var(--dim)}[data-state=paid] .shop{color:var(--pass)}.wire{position:relative;height:2px;background:var(--line);margin:18px 5px 0}.wire .fill{position:absolute;left:0;top:0;height:2px;width:var(--progress);background:var(--home)}[data-state=paid] .wire .fill{background:linear-gradient(90deg,var(--home),var(--pass))}[data-state=refused] .wire .fill{background:linear-gradient(90deg,var(--home),var(--fail))}.tick{position:absolute;width:1px;height:8px;top:-3px;background:var(--line)}.tick.passed{background:var(--home)}[data-state=paid] .tick:last-of-type{background:var(--pass)}.traveller{position:absolute;left:var(--progress);top:1px;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--ink)}.timeline{padding:17px 0 0;margin:27px 0 0;border-top:1px solid var(--line);list-style:none}.step{height:35px;display:grid;grid-template-columns:15px 1fr auto;gap:7px;align-items:center;position:relative;font-size:12px;color:var(--faint)}.step:before{content:'';position:absolute;left:4px;top:18px;height:35px;width:1px;background:var(--line)}.step:last-child:before{display:none}.node{z-index:1;width:9px;height:9px;border:1px solid var(--faint);border-radius:50%;background:var(--ink)}.step.reached{color:var(--text)}.step.reached .node{background:var(--home);border-color:var(--home)}.step.reached:before{background:var(--home)}.step.current:before{background:var(--line)}.step.settled .node,.step.settled:before{background:var(--pass);border-color:var(--pass)}.step.failed .node{background:var(--fail);border-color:var(--fail)}.step.failed{color:var(--fail)}.step.failed:before{background:var(--line)}.step time{font:10px var(--mono);color:var(--dim)}.step:not(.reached) time{color:var(--faint)}.step-label{white-space:nowrap;letter-spacing:-.015em}.outcome{border-top:1px solid var(--line);margin-top:18px;padding-top:17px}.outcome strong{font-size:17px;font-weight:500;letter-spacing:-.025em;color:var(--accent)}.outcome p{font-size:12px;color:var(--dim);margin:6px 0 0;line-height:1.4}.action{margin-top:20px;height:43px;border:1px solid #343a47;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text)}.action.pending{color:var(--dim);border-color:var(--line)}.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);height:3px;width:100px;border-radius:3px;background:#f2f4f74d}.caption{display:flex;justify-content:space-between;margin-top:19px;line-height:1.7}.caption span:last-child{letter-spacing:0;color:var(--dim)}.footnote{width:1132px;margin:25px auto 0;font:10px var(--mono);color:var(--faint)}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="board"><strong>Kirogi</strong><span>PAYMENT / EVERY MILLISECOND ACCOUNTED FOR</span></header>
+<main aria-label="Three payment states"></main>
+<p class="footnote">Illustrative payment timing · Live sequence repeats every 4.2 s · Reduced motion holds an in-flight snapshot.</p>
+<script>
+'use strict';
+// Demonstration events, not a live network connection. Event timestamps remain
+// immutable; only the elapsed display and crossing interpolate between them.
+const STAGES=[{at:0,label:'Signed with Face ID'},{at:110,label:'Sent to Monad'},{at:420,label:'In block #66,123,431'},{at:720,label:'Final'},{at:860,label:'Shop was paid'}];
+const END=860, LOOP=4200, REFUSED=500;
+const format=ms=>(ms/1000).toFixed(2);
+const main=document.querySelector('main');
+function createPhone(kind,index){
+ const figure=document.createElement('figure');
+ figure.innerHTML=`<section class="phone" aria-label="${kind==='flight'?'Animated payment':kind==='paid'?'Paid payment':'Refused payment'}"><div class="screen" data-state="${kind}" style="--progress:0%">
+ <div class="statusbar" aria-hidden="true"><span>9:41</span><span class="island"></span><span class="status-icons"><i class="signal"></i><span style="font-size:9px">5G</span><i class="battery"></i></span></div>
+ <div class="nav"><span class="brand">Kirogi</span><span class="eyebrow">Payment</span></div>
+ <h1></h1><p class="amount"><b>$86.40</b><span>·</span>Groceries</p>
+ <div class="timer"><div class="eyebrow">Elapsed</div><div class="clock" aria-label="Elapsed seconds"><span class="digits">0.00</span><small>s</small></div></div>
+ <div class="crossing"><div class="ends"><span class="payer">Jiwoo</span><span class="shop">Westwood Market</span></div><div class="wire" aria-hidden="true"><i class="fill"></i>${STAGES.map((_,i)=>`<i class="tick" style="left:${i*25}%"></i>`).join('')}<i class="traveller"></i></div></div>
+ <ol class="timeline">${STAGES.map(s=>`<li class="step"><i class="node" aria-hidden="true"></i><span class="step-label">${s.label}</span><time>—</time></li>`).join('')}</ol>
+ <div class="outcome" role="status" aria-live="off"><strong></strong><p></p></div><div class="action" aria-label="Illustrative app action"></div><div class="home-indicator" aria-hidden="true"></div>
+ </div></section><figcaption class="caption"><span>0${index} / ${kind==='flight'?'IN FLIGHT':kind.toUpperCase()}</span><span>${kind==='flight'?'Live → frozen':kind==='paid'?'Settled in 0.86 s':'Stopped at 0.50 s'}</span></figcaption>`;
+ main.append(figure);
+ const screen=figure.querySelector('.screen');
+ return {screen,title:screen.querySelector('h1'),digits:screen.querySelector('.digits'),rows:[...screen.querySelectorAll('.step')],ticks:[...screen.querySelectorAll('.tick')],strong:screen.querySelector('.outcome strong'),note:screen.querySelector('.outcome p'),action:screen.querySelector('.action')};
+}
+// Equal milestone spacing makes each confirmation legible. Both crossing and
+// timeline use the same event schedule, with continuous travel between events.
+function progressAt(ms){
+ if(ms>=END)return 100;
+ const i=STAGES.findIndex((s,n)=>n<4&&ms>=s.at&&ms<STAGES[n+1].at);
+ return i<0?0:(i+(ms-STAGES[i].at)/(STAGES[i+1].at-STAGES[i].at))*25;
+}
+function render(view,ms,refused=false){
+ const elapsed=refused?REFUSED:Math.min(ms,END),paid=!refused&&elapsed>=END;
+ view.screen.dataset.state=refused?'refused':paid?'paid':'flight';
+ view.screen.style.setProperty('--progress',progressAt(elapsed)+'%');
+ view.digits.textContent=format(elapsed);
+ view.title.textContent=refused?'Payment refused.':paid?'Shop was paid.':'Paying the shop.';
+ view.ticks.forEach((tick,i)=>tick.classList.toggle('passed',!refused&&elapsed>=STAGES[i].at || refused&&i<3));
+ view.rows.forEach((row,i)=>{
+  const failed=refused&&i===3,at=failed?REFUSED:STAGES[i].at;
+  const reached=refused?i<=3:elapsed>=at;
+  row.className='step'+(reached?' reached':'')+(paid?' settled':'')+(failed?' failed':'')+((refused?i===3:reached&&(i===4||elapsed<STAGES[i+1].at))?' current':'');
+  row.querySelector('.step-label').textContent=failed?'Contract refused':refused&&i===4?'Shop not paid':STAGES[i].label;
+  row.querySelector('time').textContent=reached?format(at)+' s':'—';
+  row.querySelector('time').setAttribute('datetime','PT'+(reached?at/1000:0)+'S');
+ });
+ view.strong.textContent=refused?'Balance unchanged.':paid?'Received in full.':'On its way.';
+ view.note.textContent=refused?'No money left your account.':paid?'Westwood Market has $86.40.':'Waiting for settlement.';
+ view.action.textContent=paid||refused?'Done':'Processing';
+ view.action.classList.toggle('pending',!paid&&!refused);
+}
+const live=createPhone('flight',1),paid=createPhone('paid',2),refused=createPhone('refused',3);
+render(paid,END);render(refused,REFUSED,true);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+let origin=0,frameId;
+function frame(now){if(!origin)origin=now;render(live,(now-origin)%LOOP);frameId=requestAnimationFrame(frame)}
+function start(){cancelAnimationFrame(frameId);origin=0;if(reduced.matches){render(live,420)}else{render(live,0);frameId=requestAnimationFrame(frame)}}
+reduced.addEventListener('change',start);start();
+</script>
+</body>
+</html>

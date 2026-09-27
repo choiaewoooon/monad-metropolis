@@ -135,8 +135,8 @@ export type RelayResult = {
 /** JSON can't carry bigint; tag them. */
 const ser = (o: unknown) => JSON.stringify(o, (_, v) => (typeof v === "bigint" ? { $big: v.toString() } : v));
 
-export async function relay(action: "fund" | "send" | "pay" | "allow", body: unknown): Promise<RelayResult> {
-  const r = await fetch("/api/relay", { method: "POST", headers: { "content-type": "application/json" }, body: ser({ action, body }) });
+export async function relay(action: "fund" | "send" | "pay" | "allow", body: unknown, submitOnly = false): Promise<RelayResult> {
+  const r = await fetch("/api/relay", { method: "POST", headers: { "content-type": "application/json" }, body: ser({ action, body, submitOnly }) });
   const j = await r.json().catch(() => ({ error: `relay ${r.status}` }));
   if (!r.ok) throw new Error(j.error ?? "relay failed");
   return j;

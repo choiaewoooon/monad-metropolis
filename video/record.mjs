@@ -157,7 +157,7 @@ try {
   await waitText("Paid from");
   await sleep(1600);
   await click("Pay");
-  await waitText("Shop was paid", 60000);
+  await waitText("Received in full.", 60000);
   await grab("Jiwoo pays Westwood Market from Groceries");
   await stop("04-pay", 3200);
 
@@ -170,7 +170,8 @@ try {
   await waitText("Not covered");
   await sleep(1600);
   await click("Pay");
-  await waitText("Refused by contract", 60000);
+  await sleep(200);
+  await waitText("Balance unchanged.", 60000);
   await grab("Jiwoo tries Neon Arcade with grocery money");
   await stop("05-refuse", 3600);
 
@@ -191,7 +192,7 @@ try {
   await waitText("Paid from");
   await sleep(900);
   await click("Pay");
-  await waitText("Shop was paid", 60000);
+  await waitText("Received in full.", 60000);
   await grab("Jiwoo pays Neon Arcade again");
   await stop("06-allow", 2500);
 

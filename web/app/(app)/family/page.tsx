@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Top, useSignedIn } from "@/components/Top";
-import { labelOf, PLACE_ICON, PLACES, placeByAddress, PURPOSE_ICON, txUrl, type Place } from "@/lib/config";
+import { labelOf, PLACE_ICON, PLACES, placeByAddress, PURPOSE_ICON, type Place } from "@/lib/config";
 import { CountUp, Icon } from "@/components/Motion";
-import { findPocket, fmt, pocketsOf, relay, signPay, toUnits, type Pocket, type RelayResult } from "@/lib/kirogi";
+import { findPocket, fmt, pocketsOf, relay, signPay, toUnits, type Pocket } from "@/lib/kirogi";
+import { follow, type Progress } from "@/lib/track";
+import { InFlight } from "@/components/InFlight";
 import { addRequest } from "@/lib/requests";
-import { secs, short } from "@/lib/util";
 
 type Lane = { purpose: string; left: bigint; ids: bigint[] };
 type Scanned = { place: Place; amount: string };
@@ -23,7 +24,7 @@ export default function Family() {
   const [pocketId, setPocketId] = useState<bigint | null>(null);
   const [camera, setCamera] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<(RelayResult & { place: Place; amount: string; from: string }) | null>(null);
+  const [flight, setFlight] = useState<{ t0: number; progress: Progress; place: Place; amount: string; from: string; pocketId: bigint } | null>(null);
   const [asked, setAsked] = useState(false);
   const [err, setErr] = useState("");
 
@@ -59,52 +60,49 @@ export default function Family() {
     setBusy(true); setErr("");
     // No covering pocket? Try the selected one anyway — the contract refuses, on-chain, and that's the point.
     const id = pocketId ?? selected.ids[0];
+    const t0 = performance.now();
+    const meta = { t0, place: scanned.place, amount: scanned.amount, from: labelOf(pockets.find((p) => p.id === id)!.purpose), pocketId: id };
+    setFlight({ ...meta, progress: { at: {} } });
     try {
       const signed = await signPay(accounts.family, id, scanned.place.address, toUnits(scanned.amount));
-      const r = await relay("pay", signed);
-      setResult({ ...r, place: scanned.place, amount: scanned.amount, from: labelOf(pockets.find((p) => p.id === id)!.purpose) });
+      let p: Progress = { at: { signed: performance.now() - t0 } };
+      setFlight({ ...meta, progress: p });
+      const r = await relay("pay", signed, true);
+      p = { ...p, hash: r.hash, at: { ...p.at, sent: performance.now() - t0 } };
+      setFlight({ ...meta, progress: p });
+      await follow(r.hash, t0, (np) => setFlight({ ...meta, progress: np }), p);
       await load();
     } catch (e) {
       setErr((e as Error).message);
+      setFlight(null);
     } finally {
       setBusy(false);
     }
   }
 
-  function reset() { setResult(null); setScanned(null); setPocketId(null); setAsked(false); }
+  function reset() { setFlight(null); setScanned(null); setPocketId(null); setAsked(false); }
 
   if (!accounts) return null;
 
-  // ---------------------------------------------------------------- result
-  if (result) {
-    const ok = result.status === "success";
+  // ---------------------------------------------------------------- in flight → paid / refused
+  if (flight) {
+    const refused = flight.progress.status === "reverted";
+    const settled = refused || flight.progress.at.finalized !== undefined;
     return (
       <>
         <Top left={<><span className="dot send" />From Dad</>} />
-        <div className="pad">
-          <h1 className="display d1" style={{ marginTop: 18 }}>{ok ? `Paid ${result.place.name}.` : "Not paid."}</h1>
-          {!ok && <p className="lede">This shop isn&apos;t one Dad allowed. Your money didn&apos;t move.</p>}
-          <div className={`card verdict ${ok ? "ok" : "no"}`} style={{ marginTop: 20 }}>
-            <div className={`pill ${ok ? "ok" : "no"}`}><span className="dot" />{ok ? "Shop was paid" : "Refused by contract"}<span className="note">{secs(result.ms)}</span></div>
-            <dl className="kv" style={{ marginTop: 14 }}>
-              <dt>Shop</dt><dd className="mono">{result.place.name}</dd>
-              <dt>{ok ? "From" : "Tried"}</dt><dd className="mono">{ok ? result.from : `${fmt(Number(result.amount))} · ${result.from}`}</dd>
-              {!ok && (<><dt>Reason</dt><dd className="mono">{result.error?.name ?? "reverted"}</dd></>)}
-              <dt>Left</dt><dd className="mono">{fmt(left)}{ok ? "" : " unchanged"}</dd>
-              <dt>Tx</dt>
-              <dd className="mono" data-tx={result.hash} data-ok={ok ? "1" : "0"}>{txUrl(result.hash) ? <a href={txUrl(result.hash)} target="_blank" rel="noreferrer">{short(result.hash)}</a> : short(result.hash)}</dd>
-            </dl>
-          </div>
-        </div>
+        <InFlight t0={flight.t0} progress={flight.progress} title={`Paying ${flight.place.name}…`}
+          amount={fmt(Number(flight.amount))} purpose={flight.from} from="Jiwoo" to={flight.place.name}
+          done={{ ok: "Shop was paid.", okNote: `${flight.place.name} has ${fmt(Number(flight.amount))}.`,
+            noNote: `This shop isn't one Dad allowed for ${flight.from}. No money left your account.` }} />
         <div className="grow" />
-        {!ok && (
+        {refused && (
           <button className="ghost" disabled={asked} onClick={() => {
-            const id = (pocketId ?? selected?.ids[0])!;
-            addRequest({ pocketId: id.toString(), merchant: result.place.address, name: result.place.name, purpose: result.from, at: Date.now() });
+            addRequest({ pocketId: flight.pocketId.toString(), merchant: flight.place.address, name: flight.place.name, purpose: flight.from, at: Date.now() });
             setAsked(true);
           }}>{asked ? "Asked Dad" : "Ask Dad to allow it"}</button>
         )}
-        <button className="btn" onClick={reset}>Done</button>
+        <button className="btn" onClick={reset} disabled={!settled}>{settled ? "Done" : "Processing"}</button>
       </>
     );
   }

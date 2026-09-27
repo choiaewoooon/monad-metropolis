@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Top, useSignedIn } from "@/components/Top";
-import { DEMO_FUND, placeById, PURPOSE_ICON, purposeId, txUrl, type Purpose } from "@/lib/config";
-import { CountUp, Crossing, Icon } from "@/components/Motion";
-import { balanceOf, fmt, relay, signSend, toUnits, type Part, type RelayResult } from "@/lib/kirogi";
-import { short } from "@/lib/util";
+import { DEMO_FUND, placeById, PURPOSE_ICON, purposeId, type Purpose } from "@/lib/config";
+import { CountUp, Icon } from "@/components/Motion";
+import { balanceOf, fmt, relay, signSend, toUnits, type Part } from "@/lib/kirogi";
+import { follow, type Progress } from "@/lib/track";
+import { InFlight } from "@/components/InFlight";
 
 type Row = { purpose: Purpose; label: string; rule: 0 | 1; payee?: string; note: string; amount: number };
 
@@ -23,7 +24,7 @@ export default function Send() {
   const [amount, setAmount] = useState(String(DEMO_FUND));
   const [rows, setRows] = useState<Row[]>(DEFAULT_ROWS);
   const [balance, setBalance] = useState<bigint | null>(null);
-  const [result, setResult] = useState<RelayResult | null>(null);
+  const [flight, setFlight] = useState<{ t0: number; progress: Progress } | null>(null);
   const [err, setErr] = useState("");
 
   const total = Number(amount || 0);
@@ -74,11 +75,17 @@ export default function Send() {
   async function send() {
     if (!accounts) return;
     setErr("");
+    const t0 = performance.now();
+    setFlight({ t0, progress: { at: {} } });
     setStep("sending");
     try {
       const signed = await signSend(accounts.you, accounts.family.address, parts, BigInt(30 * 24 * 3600));
-      const r = await relay("send", signed);
-      setResult(r);
+      let p: Progress = { at: { signed: performance.now() - t0 } };
+      setFlight({ t0, progress: p });
+      const r = await relay("send", signed, true);
+      p = { ...p, hash: r.hash, at: { ...p.at, sent: performance.now() - t0 } };
+      setFlight({ t0, progress: p });
+      await follow(r.hash, t0, (np) => setFlight({ t0, progress: np }), p);
       setStep("done");
     } catch (e) {
       setErr((e as Error).message);
@@ -146,40 +153,30 @@ export default function Send() {
       </>
     );
 
-  if (step === "sending")
-    return (
-      <>
-        <Top left={<span className="stepper">Sending on Monad</span>} />
-        <div className="pad" style={{ marginTop: 18 }}>
-          <h1 className="display d1">Sending to Jiwoo…</h1>
-          <p className="lede">Signed with your passkey. Kirogi pays the network fee.</p>
-          <Crossing from="You" to="Jiwoo" />
-        </div>
-      </>
-    );
-
+  // sending and done share one screen: the transfer in flight, then final
   return (
     <>
       <Top left={<><span className="dot home" />To Jiwoo</>} />
-      <div className="pad">
-        <h1 className="display d1" style={{ marginTop: 18 }}>Jiwoo has it.</h1>
-        <div className="card verdict ok" style={{ marginTop: 20 }}>
-          <div className="pill ok"><span className="dot" />Arrived<span className="note">{((result?.ms ?? 0) / 1000).toFixed(1)} s</span></div>
-          <dl className="kv" style={{ marginTop: 14 }}>
-            {rows.filter((r) => r.amount).map((r) => (
-              <FragmentRow key={r.purpose} k={r.label} v={fmt(r.amount)} />
-            ))}
-            <dt>Block</dt><dd className="mono">{Number(result?.block ?? 0).toLocaleString("en-US")}</dd>
-            <dt>Tx</dt>
-            <dd className="mono" data-tx={result?.hash} data-ok="1">{result && (txUrl(result.hash)
-              ? <a href={txUrl(result.hash)} target="_blank" rel="noreferrer">{short(result.hash)}</a>
-              : short(result.hash))}</dd>
-          </dl>
-        </div>
-      </div>
+      {flight && (
+        <InFlight t0={flight.t0} progress={flight.progress} title="Sending to Jiwoo…" amount={fmt(total)}
+          purpose="3 purposes" from="You" to="Jiwoo"
+          done={{ ok: "Jiwoo has it.", okNote: "Unspent money comes back after 30 days." }}>
+          {step === "done" && (
+            <dl className="kv" style={{ marginTop: 10, paddingBottom: 12 }}>
+              {rows.filter((r) => r.amount).map((r) => (<FragmentRow key={r.purpose} k={r.label} v={`${fmt(r.amount)} · ${r.note}`} />))}
+            </dl>
+          )}
+        </InFlight>
+      )}
       <div className="grow" />
-      <Link className="ghost" href="/activity">See activity</Link>
-      <Link className="btn" href="/family">Switch to Jiwoo&apos;s phone</Link>
+      {step === "done" ? (
+        <>
+          <Link className="ghost" href="/activity">See activity</Link>
+          <Link className="btn" href="/family">Switch to Jiwoo&apos;s phone</Link>
+        </>
+      ) : (
+        <button className="btn" disabled>Processing</button>
+      )}
     </>
   );
 }

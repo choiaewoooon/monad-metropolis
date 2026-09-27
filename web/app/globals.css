@@ -141,3 +141,49 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 @keyframes ping { from { opacity: .9; transform: scale(.4); } to { opacity: 0; transform: scale(1.9); } }
 .display.d1 { animation: rise 380ms cubic-bezier(.2,.8,.2,1) both; }
 .row-icon { display: flex; align-items: center; gap: 12px; }
+
+/* ---------- payment in flight (design: Codex, design/pending-final.html) ---------- */
+.flight { padding: 0 22px; --accent: var(--home); }
+.flight[data-state="paid"] { --accent: var(--pass); }
+.flight[data-state="refused"] { --accent: var(--fail); }
+.flight-title { font-size: 28px; letter-spacing: -0.045em; line-height: 1.12; font-weight: 600; margin: 14px 0 8px; }
+.flight-amount { font-size: 14px; color: var(--dim); }
+.flight-amount b { font-family: var(--mono); font-weight: 400; color: var(--text); }
+.flight-amount span { margin: 0 6px; color: var(--faint); }
+.mono-eyebrow { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em; color: var(--dim); text-transform: uppercase; }
+.flight-timer { margin-top: 26px; }
+.flight-clock { display: flex; align-items: baseline; gap: 9px; font-family: var(--mono); font-weight: 500; font-size: 66px; line-height: 1.16;
+  letter-spacing: -0.07em; color: var(--accent); margin-top: 4px; transition: color 240ms; }
+.flight-clock small { font-size: 26px; font-weight: 400; letter-spacing: -0.03em; }
+.flight-crossing { margin-top: 22px; }
+.flight-crossing .ends { display: flex; justify-content: space-between; font-size: 12.5px; }
+.flight-crossing .payer { color: var(--home); }
+.flight-crossing .shop { color: var(--dim); transition: color 240ms; }
+.flight[data-state="paid"] .shop { color: var(--pass); }
+.flight-crossing .wire { position: relative; height: 2px; background: var(--line); margin: 18px 5px 0; }
+.flight-crossing .fill { position: absolute; left: 0; top: 0; height: 2px; width: var(--progress); background: var(--home); transition: width 260ms cubic-bezier(.4,0,.2,1); }
+.flight[data-state="paid"] .fill { background: linear-gradient(90deg, var(--home), var(--pass)); }
+.flight[data-state="refused"] .fill { background: linear-gradient(90deg, var(--home), var(--fail)); }
+.flight-crossing .tick { position: absolute; width: 1px; height: 8px; top: -3px; background: var(--line-bright); }
+.flight-crossing .tick.passed { background: var(--home); }
+.flight-crossing .traveller { position: absolute; left: var(--progress); top: 1px; transform: translate(-50%, -50%); width: 11px; height: 11px;
+  border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--ink), 0 0 16px var(--accent); transition: left 260ms cubic-bezier(.4,0,.2,1), background 240ms; }
+.flight-steps { list-style: none; margin: 20px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); }
+.flight-steps .step { height: 36px; display: grid; grid-template-columns: 15px 1fr auto; gap: 8px; align-items: center; position: relative; font-size: 13px; color: var(--faint); }
+.flight-steps .step::before { content: ""; position: absolute; left: 4px; top: 19px; height: 36px; width: 1px; background: var(--line); }
+.flight-steps .step:last-child::before { display: none; }
+.flight-steps .node { z-index: 1; width: 9px; height: 9px; border: 1px solid var(--faint); border-radius: 50%; background: var(--ink); }
+.flight-steps .step.reached { color: var(--text); }
+.flight-steps .step.reached .node { background: var(--home); border-color: var(--home); }
+.flight-steps .step.reached::before { background: var(--home); }
+.flight-steps .step.current .node { border-color: var(--home); animation: node-pulse 900ms ease-out infinite; }
+@keyframes node-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--home) 60%, transparent); } 100% { box-shadow: 0 0 0 9px transparent; } }
+.flight-steps .step.settled .node, .flight-steps .step.settled::before { background: var(--pass); border-color: var(--pass); }
+.flight-steps .step.failed { color: var(--fail); }
+.flight-steps .step.failed .node { background: var(--fail); border-color: var(--fail); }
+.flight-steps time { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.flight-outcome { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+.flight-outcome strong { font-size: 17px; font-weight: 500; letter-spacing: -0.025em; color: var(--accent); }
+.flight-outcome p { font-size: 13px; color: var(--dim); margin-top: 6px; line-height: 1.45; }
+.flight-tx { font-family: var(--mono); font-size: 11.5px !important; }
+.flight-tx a { border-bottom: 1px solid var(--line-bright); }

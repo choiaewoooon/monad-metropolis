@@ -83,7 +83,7 @@ const de = (o: unknown): unknown =>
 type Action = keyof typeof GAS;
 
 export async function POST(req: Request) {
-  const { action, body } = de(await req.json()) as { action: Action; body: Record<string, unknown> };
+  const { action, body, submitOnly } = de(await req.json()) as { action: Action; body: Record<string, unknown>; submitOnly?: boolean };
   if (!(action in GAS)) return NextResponse.json({ error: "unknown action" }, { status: 400 });
 
   let request: Parameters<typeof wallet.writeContract>[0];
@@ -143,6 +143,8 @@ export async function POST(req: Request) {
     // the timer measures what the user feels: submit → included in a block → receipt back
     const t0 = performance.now();
     const hash = await serial(() => wallet.writeContract(request));
+    // the app follows the transaction itself through Proposed → Voted → Finalized
+    if (submitOnly) return NextResponse.json({ hash, submitted: true, ms: Math.round(performance.now() - t0), error });
     const receipt = await pub.waitForTransactionReceipt({ hash, pollingInterval: 100 });
     const ms = Math.round(performance.now() - t0);
     return NextResponse.json({ hash, status: receipt.status, ms, block: receipt.blockNumber.toString(), error });
