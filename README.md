@@ -9,8 +9,8 @@ Monad Metropolis · **Track 02 — Consumer Products & Payments**
 
 | | |
 |---|---|
-| Demo video (≤ 3 min) | _TBD_ |
-| Live app | _TBD_ |
+| Demo video (1:44) | [kirogi-monad.vercel.app/kirogi-monad-demo.mp4](https://kirogi-monad.vercel.app/kirogi-monad-demo.mp4) · also [`docs/kirogi-monad-demo.mp4`](docs/kirogi-monad-demo.mp4) |
+| Live app | **[kirogi-monad.vercel.app](https://kirogi-monad.vercel.app)** (landing) · [/app](https://kirogi-monad.vercel.app/app) (the app, testnet) |
 | Network | Monad Testnet (chain 10143) |
 
 ---
