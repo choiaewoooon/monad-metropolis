@@ -129,7 +129,7 @@ Testnet: `forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast -
 then set `NEXT_PUBLIC_CHAIN=testnet` and the printed addresses.
 
 **Judges' path (3 minutes):** open the app → *Try the demo without Face ID* (or Face ID on a phone) →
-send $2,000 split three ways → switch to **Jiwoo** → pay *Westwood Market* (paid) → pay *Neon Arcade*
+send $10 split three ways → switch to **Jiwoo** → pay *Westwood Market* (paid) → pay *Neon Arcade*
 (refused by the contract) → *Ask Dad to allow it* → switch to **You** → *Allow* → back to Jiwoo, pay again.
 
 ## Build window & prior work

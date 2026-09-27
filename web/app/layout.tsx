@@ -9,7 +9,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weigh
 export const metadata: Metadata = {
   title: "Kirogi — sent abroad, spent as intended",
   description:
-    "International remittance with earmarked spending on Monad. Each dollar can only be spent on what it was sent for, and shops are paid in under a second.",
+    "International remittance with earmarked spending on Monad. Each dollar can only be spent on what it was sent for, and shops are paid, final, in about two seconds.",
 };
 
 export const viewport: Viewport = { themeColor: "#08090c", width: "device-width", initialScale: 1 };

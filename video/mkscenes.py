@@ -58,8 +58,8 @@ SCENES = {
 <h1>Money crosses the border.<br>Its purpose doesn't.</h1>
 <p>A parent abroad sends money for tuition, rent and food. On arrival it is just cash, and the sender can only hope.</p>
 <div class="wire"></div></div></body></html>""",
-  "02-send": app_scene("Send", "Say what<br>it's for.", "Face ID, no seed phrase, no gas. <span class='home'>$2,000</span> split three ways, each with its own rule."),
-  "03-arrived": app_scene("Arrive", "Signed once.<br>There in a second.", "One passkey signature. Kirogi pays the network fee; Monad settles it in under a second."),
+  "02-send": app_scene("Send", "Say what<br>it's for.", "Face ID, no seed phrase, no gas. <span class='home'>$10</span> of real USDC, split three ways, each with its own rule."),
+  "03-arrived": app_scene("Arrive", "Signed once.<br>Final in seconds.", "One passkey signature. Kirogi pays the network fee; Monad finalizes it in about two seconds."),
   "04-pay": app_scene("Spend", "Paid at<br>the counter.", "The shop's code decides which part pays. The grocery store is paid before she leaves."),
   "05-refuse": app_scene("Refuse", "The contract<br>says <span class='fail'>no</span>.", "Grocery money can't pay an arcade. Not the app — the contract reverts, on-chain. Her balance doesn't move."),
   "06-allow": app_scene("Ask &amp; allow", "One signature<br>to allow.", "Jiwoo asks. Dad approves with one signature, recorded on-chain. The next try goes through."),
