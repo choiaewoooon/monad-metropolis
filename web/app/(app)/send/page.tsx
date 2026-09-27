@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Top, useSignedIn } from "@/components/Top";
-import { DEMO_FUND, placeById, purposeId, txUrl, type Purpose } from "@/lib/config";
+import { DEMO_FUND, placeById, PURPOSE_ICON, purposeId, txUrl, type Purpose } from "@/lib/config";
+import { CountUp, Crossing, Icon } from "@/components/Motion";
 import { balanceOf, fmt, relay, signSend, toUnits, type Part, type RelayResult } from "@/lib/kirogi";
 import { short } from "@/lib/util";
 
@@ -39,7 +40,9 @@ export default function Send() {
         b = await balanceOf(accounts.you.address);
       }
       setBalance(b);
-    })().catch((e) => setErr(String(e.message ?? e)));
+    })().catch((e) => setErr(String(e.message ?? e).includes("DEMO_FLOAT_EMPTY")
+      ? "Demo dollars are out for the moment. The demo runs on official testnet USDC from Circle's faucet — try again shortly."
+      : String(e.message ?? e)));
   }, [accounts]);
 
   // keep the split proportional when the total changes
@@ -94,7 +97,7 @@ export default function Send() {
           <div className="figure" style={{ marginTop: 30 }}>{Number(amount || 0).toLocaleString("en-US")}<small>USD</small></div>
           <dl className="card kv" style={{ marginTop: 22, padding: "14px 16px" }}>
             <dt>Jiwoo receives</dt><dd className="home">{fmt(total)}</dd>
-            <dt>Your balance</dt><dd>{balance === null ? "…" : fmt(balance)}</dd>
+            <dt>Your balance</dt><dd>{balance === null ? "…" : <CountUp value={Number(balance) / 1e6} format={(n) => fmt(n)} />}</dd>
             <dt>Arrives</dt><dd>under 1 second</dd>
           </dl>
           {err && <p className="error">{err}</p>}
@@ -120,8 +123,8 @@ export default function Send() {
           <div className="ruled" style={{ marginTop: 20 }}>
             {rows.map((r, i) => (
               <div key={r.purpose}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <span style={{ fontSize: 16 }}>{r.label}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span className="row-icon" style={{ fontSize: 16 }}><Icon src={PURPOSE_ICON[r.label]} size={30} />{r.label}</span>
                   <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <button className="nudge" aria-label={`Less for ${r.label}`} onClick={() => nudge(i, -STEP)}>−</button>
                     <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em", minWidth: 72, textAlign: "right" }}>{fmt(r.amount)}</span>
@@ -146,11 +149,11 @@ export default function Send() {
   if (step === "sending")
     return (
       <>
-        <Top left={<span className="stepper">Sending</span>} />
+        <Top left={<span className="stepper">Sending on Monad</span>} />
         <div className="pad" style={{ marginTop: 18 }}>
           <h1 className="display d1">Sending to Jiwoo…</h1>
           <p className="lede">Signed with your passkey. Kirogi pays the network fee.</p>
-          <div style={{ marginTop: 28 }}><span className="spinner" /></div>
+          <Crossing from="You" to="Jiwoo" />
         </div>
       </>
     );
@@ -168,7 +171,7 @@ export default function Send() {
             ))}
             <dt>Block</dt><dd className="mono">{Number(result?.block ?? 0).toLocaleString("en-US")}</dd>
             <dt>Tx</dt>
-            <dd className="mono">{result && (txUrl(result.hash)
+            <dd className="mono" data-tx={result?.hash} data-ok="1">{result && (txUrl(result.hash)
               ? <a href={txUrl(result.hash)} target="_blank" rel="noreferrer">{short(result.hash)}</a>
               : short(result.hash))}</dd>
           </dl>

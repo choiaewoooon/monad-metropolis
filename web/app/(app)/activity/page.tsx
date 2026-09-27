@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Top, useSignedIn } from "@/components/Top";
-import { labelOf, placeByAddress, txUrl } from "@/lib/config";
+import { labelOf, PLACE_ICON, placeByAddress, txUrl } from "@/lib/config";
+import { Icon } from "@/components/Motion";
 import { fmt, receiptsOfSender, relay, sentPockets, signAllow, type Pocket, type Receipt } from "@/lib/kirogi";
 import { listRequests, removeRequest, type AllowRequest } from "@/lib/requests";
 import { secs, short } from "@/lib/util";
@@ -87,7 +88,7 @@ export default function Activity() {
         {allowed && (
           <div className="card verdict ok" style={{ marginTop: 16 }}>
             <div className="pill ok"><span className="dot" />{allowed.name} allowed<span className="note">{secs(allowed.ms)}</span></div>
-            <p className="mono" style={{ marginTop: 10 }}>
+            <p className="mono" style={{ marginTop: 10 }} data-tx={allowed.hash} data-ok="1">
               {txUrl(allowed.hash) ? <a href={txUrl(allowed.hash)} target="_blank" rel="noreferrer">{short(allowed.hash)}</a> : short(allowed.hash)}
             </p>
           </div>
@@ -108,15 +109,15 @@ export default function Activity() {
         <div className="feed" style={{ marginTop: 14 }}>
           {items.map((it, i) =>
             it.kind === "paid" ? (
-              <div className="it" key={"p" + it.r.id}>
-                <span className="dot home" />
+              <div className="it" key={"p" + it.r.id} style={{ gridTemplateColumns: "28px 1fr auto", alignItems: "center" }}>
+                <Icon src={PLACE_ICON[placeByAddress(it.r.merchant)?.id ?? ""]} size={26} />
                 <div className="t">{placeByAddress(it.r.merchant)?.name ?? short(it.r.merchant)}
                   <span className="mono">{labelOf(it.purpose)} · {time(it.r.at)}</span></div>
                 <div className="v">{fmt(it.r.amount)}</div>
               </div>
             ) : (
-              <div className="it" key={"s" + i}>
-                <span className="dot send" />
+              <div className="it" key={"s" + i} style={{ gridTemplateColumns: "28px 1fr auto", alignItems: "center" }}>
+                <span className="dot send" style={{ justifySelf: "center" }} />
                 <div className="t">You sent<span className="mono">{time(it.at)}</span></div>
                 <div className="v">{fmt(it.total)}</div>
               </div>

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Top, useSignedIn } from "@/components/Top";
-import { labelOf, PLACES, placeByAddress, txUrl, type Place } from "@/lib/config";
+import { labelOf, PLACE_ICON, PLACES, placeByAddress, PURPOSE_ICON, txUrl, type Place } from "@/lib/config";
+import { CountUp, Icon } from "@/components/Motion";
 import { findPocket, fmt, pocketsOf, relay, signPay, toUnits, type Pocket, type RelayResult } from "@/lib/kirogi";
 import { addRequest } from "@/lib/requests";
 import { secs, short } from "@/lib/util";
@@ -91,7 +92,7 @@ export default function Family() {
               {!ok && (<><dt>Reason</dt><dd className="mono">{result.error?.name ?? "reverted"}</dd></>)}
               <dt>Left</dt><dd className="mono">{fmt(left)}{ok ? "" : " unchanged"}</dd>
               <dt>Tx</dt>
-              <dd className="mono">{txUrl(result.hash) ? <a href={txUrl(result.hash)} target="_blank" rel="noreferrer">{short(result.hash)}</a> : short(result.hash)}</dd>
+              <dd className="mono" data-tx={result.hash} data-ok={ok ? "1" : "0"}>{txUrl(result.hash) ? <a href={txUrl(result.hash)} target="_blank" rel="noreferrer">{short(result.hash)}</a> : short(result.hash)}</dd>
             </dl>
           </div>
         </div>
@@ -114,12 +115,12 @@ export default function Family() {
       <Top left={<><span className="dot send" />From Dad</>} />
       <div className="pad">
         <div className="mono" style={{ marginTop: 14 }}>Left this month</div>
-        <div className="figure" style={{ fontSize: 46, marginTop: 6 }}>{fmt(left)}</div>
+        <div className="figure" style={{ fontSize: 46, marginTop: 6 }}><CountUp value={Number(left) / 1e6} format={(n) => fmt(n)} /></div>
         {lanes.length > 0 ? (
           <div className="lanes" style={{ marginTop: 18 }}>
             {lanes.slice(0, 3).map((l) => (
               <button key={l.purpose} className={selected?.purpose === l.purpose ? "on" : ""} onClick={() => setLane(l.purpose)}>
-                <div className="n">{labelOf(l.purpose)}</div>
+                <div className="n" style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon src={PURPOSE_ICON[labelOf(l.purpose)]} size={18} />{labelOf(l.purpose)}</div>
                 <div className="v">{fmt(l.left)}</div>
               </button>
             ))}
@@ -130,7 +131,7 @@ export default function Family() {
 
         {scanned ? (
           <div className="card" style={{ marginTop: 16, padding: "18px 16px" }}>
-            <div className="mono">Scanned · {scanned.place.name}</div>
+            <div className="mono row-icon" style={{ gap: 8 }}><Icon src={PLACE_ICON[scanned.place.id]} size={22} />Scanned · {scanned.place.name}</div>
             <input className="input-amount display" style={{ fontSize: 32, marginTop: 10 }} inputMode="decimal"
               value={"$" + scanned.amount} aria-label="Amount"
               onChange={(e) => setScanned({ ...scanned, amount: e.target.value.replace(/[^0-9.]/g, "") })} />
@@ -150,7 +151,7 @@ export default function Family() {
             <div className="ruled">
               {PLACES.map((p) => (
                 <button key={p.id} className="choice" onClick={() => setScanned({ place: p, amount: DEFAULT_AMOUNT[p.id] })}>
-                  <span><span className="k">{p.name}</span><span className="mono s">{p.kind}</span></span>
+                  <span className="row-icon"><Icon src={PLACE_ICON[p.id]} size={32} /><span><span className="k">{p.name}</span><span className="mono s">{p.kind}</span></span></span>
                   <span className="mono">{fmt(Number(DEFAULT_AMOUNT[p.id]))}</span>
                 </button>
               ))}

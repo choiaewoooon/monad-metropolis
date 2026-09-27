@@ -69,3 +69,13 @@ export const placeById = (id: string) => PLACES.find((p) => p.id === id);
 /** Demo scale. Testnet dollars are official (Circle USDC / Agora AUSD) and come from rate-limited faucets,
  * so the demo moves ten dollars, not thousands. */
 export const DEMO_FUND = 10;
+
+/** Codex-made icons in the Kirogi mark's style (public/icons). */
+export const PURPOSE_ICON: Record<string, string> = {
+  Tuition: "/icons/tuition.png", Rent: "/icons/rent.png", Groceries: "/icons/groceries.png",
+  Pharmacy: "/icons/pharmacy.png", Entertainment: "/icons/arcade.png",
+};
+export const PLACE_ICON: Record<string, string> = {
+  "westwood-market": "/icons/groceries.png", "corner-pharmacy": "/icons/pharmacy.png", "neon-arcade": "/icons/arcade.png",
+  "westwood-academy": "/icons/tuition.png", landlord: "/icons/rent.png",
+};

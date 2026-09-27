@@ -39,7 +39,7 @@ export function useSignedIn() {
   const { accounts, ready } = useAccounts();
   const router = useRouter();
   useEffect(() => {
-    if (ready && !accounts) router.replace("/");
+    if (ready && !accounts) router.replace("/app");
   }, [ready, accounts, router]);
   return accounts;
 }

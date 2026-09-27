@@ -13,3 +13,5 @@ contracts/broadcast/*/31337/
 video/clips/
 video/out/
 video/audio/
+video/cards/
+video/evidence.json.bak

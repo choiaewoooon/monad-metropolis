@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useAccounts } from "./providers";
+import { useAccounts } from "../../providers";
 
 export default function Welcome() {
   const { accounts, signIn } = useAccounts();

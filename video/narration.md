@@ -12,9 +12,9 @@ Kirogi. In Korean, a wild goose — and a family with a border running through i
 
 One parent earns abroad and sends money home. For tuition, for rent, for food. But once it lands, it's just cash. The sender can only hope.
 
-Kirogi lets you send dollars and say what they're for. Face ID, no seed phrase, no gas. Two thousand dollars: twelve hundred for tuition, only at one school. Five hundred for rent, only to the landlord. Three hundred for groceries.
+Kirogi lets you send dollars and say what they're for. Face ID, no seed phrase, no gas. Split it three ways: tuition, only at one school. Rent, only to the landlord. Groceries, at any grocery store.
 
-Signed once. It arrives on Monad in under a second, split three ways.
+Signed once. Real USDC arrives on Monad in under a second, already split.
 
 On the other side, Jiwoo scans the grocery store's code. The contract picks the grocery money, and the shop is paid before she's left the counter.
 

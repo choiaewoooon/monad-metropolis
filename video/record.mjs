@@ -79,6 +79,11 @@ async function go(path) {
   await sleep(1200);
 }
 
+const evidence = [];
+async function grab(what) {
+  const tx = await js(`(() => { const e = [...document.querySelectorAll('[data-tx]')].pop(); return e ? [e.dataset.tx, e.dataset.ok] : null; })()`);
+  if (tx) evidence.push({ what, tx: tx[0], ok: tx[1] === "1" });
+}
 async function start() { frames = []; t0 = Date.now(); recording = true; }
 async function stop(name, holdMs = 800) {
   await sleep(holdMs);
@@ -114,7 +119,7 @@ await send("Page.startScreencast", { format: "jpeg", quality: 92, everyNthFrame:
 
 try {
   // 02 — sign in, amount, earmark
-  await go("/");
+  await go("/app");
   await start();
   await sleep(1400);
   await click("Try the demo without Face ID");
@@ -129,6 +134,7 @@ try {
   await start();
   await click("Send $");
   await waitText("Jiwoo has it.", 60000);
+  await grab("Dad sends $10.00, split into Tuition / Rent / Groceries");
   await stop("03-arrived", 3500);
 
   // 04 — family pays the grocery store
@@ -141,6 +147,7 @@ try {
   await sleep(1600);
   await click("Pay");
   await waitText("Shop was paid", 60000);
+  await grab("Jiwoo pays Westwood Market from Groceries");
   await stop("04-pay", 3200);
 
   // 05 — the arcade is refused by the contract
@@ -153,6 +160,7 @@ try {
   await sleep(1600);
   await click("Pay");
   await waitText("Refused by contract", 60000);
+  await grab("Jiwoo tries Neon Arcade with grocery money");
   await stop("05-refuse", 3600);
 
   // 06 — ask, allow, pay again
@@ -164,6 +172,7 @@ try {
   await sleep(1500);
   await click("Allow");
   await waitText("allowed", 60000);
+  await grab("Dad allows Neon Arcade for that pocket");
   await sleep(1500);
   await go("/family");
   await waitText("Left this month");
@@ -172,6 +181,7 @@ try {
   await sleep(900);
   await click("Pay");
   await waitText("Shop was paid", 60000);
+  await grab("Jiwoo pays Neon Arcade again");
   await stop("06-allow", 2500);
 
   // 07 — the sender's feed
@@ -180,6 +190,8 @@ try {
   await start();
   await sleep(4500);
   await stop("07-proof", 500);
+  writeFileSync(HERE + "evidence.json", JSON.stringify(evidence, null, 1));
+  console.log("evidence", evidence);
 } finally {
   await send("Page.stopScreencast").catch(() => {});
   ws.close();

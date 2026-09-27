@@ -33,7 +33,15 @@ font-size:25px;line-height:1.8;color:var(--dim);white-space:pre}
 .nums{display:grid;grid-template-columns:repeat(3,auto);gap:0 90px;margin-top:64px;justify-content:start}
 .nums b{display:block;font-size:92px;font-weight:600;letter-spacing:-.045em;line-height:1}
 .nums span{display:block;margin-top:14px;font-size:24px;color:var(--dim)}
-.wire{height:2px;width:520px;background:linear-gradient(90deg,var(--send),var(--home));margin-top:56px;border-radius:2px}
+.card>*{animation:up .9s cubic-bezier(.2,.8,.2,1) both}
+.card>*:nth-child(2){animation-delay:.18s}.card>*:nth-child(3){animation-delay:.36s}.card>*:nth-child(4){animation-delay:.54s}
+.nums>div{animation:up .9s cubic-bezier(.2,.8,.2,1) both}.nums>div:nth-child(2){animation-delay:.9s}.nums>div:nth-child(3){animation-delay:1.1s}
+@keyframes up{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.push{animation:push 14s linear both}@keyframes push{from{transform:scale(1.02)}to{transform:scale(1.12)}}
+.wire{height:2px;width:520px;transform-origin:left;animation:grow 1.6s .7s cubic-bezier(.6,0,.35,1) both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+body.still *{animation:none!important}
+.wire{background:linear-gradient(90deg,var(--send),var(--home));margin-top:56px;border-radius:2px}
 </style></head><body>"""
 
 def app_scene(step, title, body, cls=""):
@@ -41,7 +49,7 @@ def app_scene(step, title, body, cls=""):
 <h1 class="{cls}">{title}</h1><p>{body}</p></div></div></body></html>"""
 
 SCENES = {
-  "00-open": HEAD + """<div style="position:absolute;inset:0;background:url(hero-arrival.jpg) 100% 60%/135% auto no-repeat"></div>
+  "00-open": HEAD + """<div class="push" style="position:absolute;inset:0;background:url(hero-arrival.jpg) 100% 60%/135% auto no-repeat"></div>
 <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,9,12,.96) 0%,rgba(8,9,12,.8) 38%,rgba(8,9,12,0) 70%)"></div>
 <div class="card"><img src="kirogi-mark.png" style="height:150px;align-self:flex-start;margin-bottom:44px">
 <h1>Sent abroad.<br>Spent as intended.</h1>
@@ -88,7 +96,8 @@ def shot(html_path, png, transparent=False):
 
 for name, html in SCENES.items():
     f = SC / f"{name}.html"; f.write_text(html)
-    shot(f, FR / f"{name}.png")
+    g = SC / f"{name}.still.html"; g.write_text(html.replace("<body>", '<body class="still">', 1))
+    shot(g, FR / f"{name}.png")
 f = SC / "phone.html"; f.write_text(PHONE)
 shot(f, FR / "phone.png", transparent=True)
 print("rendered", len(SCENES) + 1)

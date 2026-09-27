@@ -77,23 +77,31 @@ def speech_segments(wav):
     return [[bounds[i], bounds[i + 1]] for i in range(0, len(bounds), 2)]
 
 
+def base_input(name, dur):
+    """The scene's background: its animated card (cards/NN.mp4, held on the last frame) or the still."""
+    card = HERE / "cards" / f"{name}.mp4"
+    if card.exists():
+        return ["-i", str(card)], f"[0:v]fps={FPS},tpad=stop_mode=clone:stop_duration={dur:.2f},trim=duration={dur:.2f},setpts=PTS-STARTPTS[bg]"
+    return ["-loop", "1", "-t", f"{dur:.2f}", "-i", str(FR / f"{name}.png")], f"[0:v]fps={FPS},trim=duration={dur:.2f}[bg]"
+
+
 def scene_video(name, dur):
     out = OUT / f"{name}.mp4"
-    still = FR / f"{name}.png"
     clip = CL / f"{name}.mp4"
+    inp, bg = base_input(name, dur)
     if not clip.exists():
-        run("ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-t", f"{dur:.2f}", "-i", str(still),
-            "-vf", f"fps={FPS},format=yuv420p", "-c:v", "libx264", "-crf", "18", str(out))
+        run("ffmpeg", "-y", "-loglevel", "error", *inp, "-filter_complex", bg + ";[bg]format=yuv420p[v]", "-map", "[v]",
+            "-c:v", "libx264", "-crf", "18", str(out))
         return out
     cd = probe(clip)
-    room = dur - 0.3
+    room = dur - 0.6
     # fit the recording to the line: speed it up if it's longer, hold its last frame if it's shorter
     speed = f"setpts=PTS*{room / cd:.4f}," if cd > room else ""
     hold = max(0.0, room - cd) + 0.3
-    fc = (f"[1:v]{speed}scale={PW}:{PH}:flags=lanczos,tpad=start_duration=0.3:start_mode=clone:"
+    fc = (bg + f";[1:v]{speed}scale={PW}:{PH}:flags=lanczos,tpad=start_duration=0.6:start_mode=clone:"
           f"stop_duration={hold:.2f}:stop_mode=clone[c];"
-          f"[0:v][c]overlay={PX}:{PY}:shortest=0[v1];[v1][2:v]overlay=0:0,trim=duration={dur:.2f},fps={FPS},format=yuv420p[v]")
-    run("ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-t", f"{dur:.2f}", "-i", str(still), "-i", str(clip),
+          f"[bg][c]overlay={PX}:{PY}:shortest=0[v1];[v1][2:v]overlay=0:0,trim=duration={dur:.2f},fps={FPS},format=yuv420p[v]")
+    run("ffmpeg", "-y", "-loglevel", "error", *inp, "-i", str(clip),
         "-loop", "1", "-t", f"{dur:.2f}", "-i", str(FR / "phone.png"), "-filter_complex", fc, "-map", "[v]",
         "-c:v", "libx264", "-crf", "18", str(out))
     return out

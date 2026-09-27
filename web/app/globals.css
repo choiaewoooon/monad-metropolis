@@ -35,8 +35,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   display: flex; flex-direction: column; position: relative;
 }
 @media (min-width: 600px) {
-  body { padding: 28px 0; }
-  .app { min-height: calc(100dvh - 56px); border-radius: 36px; border: 1px solid #1a1c22; overflow: hidden; }
+  .app { margin: 28px auto; min-height: calc(100dvh - 56px); border-radius: 36px; border: 1px solid #1a1c22; overflow: hidden; }
 }
 .pad { padding: 0 22px; }
 .grow { flex: 1; }
@@ -125,3 +124,20 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 .nudge { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--line-bright); color: var(--dim); font-size: 18px; line-height: 1; }
 .nudge:active { background: var(--surface); }
+
+/* ---------- motion: few, and each one answers something the person did ---------- */
+.crossing-anim { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; margin-top: 34px; font-size: 14px; }
+.crossing-anim .end { display: flex; align-items: center; gap: 7px; }
+.crossing-anim .line { height: 2px; background: var(--line-bright); position: relative; overflow: hidden; border-radius: 2px; }
+.crossing-anim .line i { position: absolute; inset: 0; background: linear-gradient(90deg, var(--send), var(--home));
+  transform-origin: left; animation: cross-go 1.2s cubic-bezier(.6,0,.35,1) infinite; }
+@keyframes cross-go { 0% { transform: scaleX(0); } 75% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+.verdict { animation: rise 420ms cubic-bezier(.2,.8,.2,1) both; }
+.verdict.no { animation: rise 420ms cubic-bezier(.2,.8,.2,1) both, nudge 360ms 380ms ease-in-out 1; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes nudge { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+.pill .dot { position: relative; }
+.pill.ok .dot::after, .pill.no .dot::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid currentColor; animation: ping 900ms ease-out 1 both; }
+@keyframes ping { from { opacity: .9; transform: scale(.4); } to { opacity: 0; transform: scale(1.9); } }
+.display.d1 { animation: rise 380ms cubic-bezier(.2,.8,.2,1) both; }
+.row-icon { display: flex; align-items: center; gap: 12px; }
