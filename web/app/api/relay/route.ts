@@ -15,8 +15,9 @@ const wallet = createWalletClient({ account: relayer, chain, transport: http(RPC
 const pub = createPublicClient({ chain, transport: http(RPC) });
 
 // Monad charges the declared gas limit, so declare it instead of estimating (a refused payment can't be estimated).
-// measured with `forge test --gas-report` under network = "monad", plus ~10%
-const GAS = { fund: 150_000n, send: 860_000n, pay: 360_000n, allow: 185_000n } as const;
+// measured on Monad testnet against Circle USDC (heavier than a plain ERC-20), plus headroom for
+// first-time storage (a new nonce slot, a new receipt page)
+const GAS = { fund: 150_000n, send: 1_000_000n, pay: 480_000n, allow: 220_000n } as const;
 
 // One relayer account: submissions go out one at a time so nonces never collide under concurrent users.
 let queue: Promise<unknown> = Promise.resolve();

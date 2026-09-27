@@ -98,7 +98,7 @@ export default function Send() {
           <dl className="card kv" style={{ marginTop: 22, padding: "14px 16px" }}>
             <dt>Jiwoo receives</dt><dd className="home">{fmt(total)}</dd>
             <dt>Your balance</dt><dd>{balance === null ? "…" : <CountUp value={Number(balance) / 1e6} format={(n) => fmt(n)} />}</dd>
-            <dt>Arrives</dt><dd>under 1 second</dd>
+            <dt>Arrives</dt><dd>in seconds</dd>
           </dl>
           {err && <p className="error">{err}</p>}
         </div>

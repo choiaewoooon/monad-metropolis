@@ -15,12 +15,16 @@ const CLIPS = HERE + "clips/";
 const FPS = 30;
 const W = 390, H = 844, DPR = 2;
 
-rmSync(CLIPS, { recursive: true, force: true });
+// RESUME=<chrome profile dir> FROM=04 re-records from a scene onward with the same accounts
+// (keeps earlier clips; saves testnet gas when a later scene failed).
+const RESUME = process.env.RESUME, FROM = process.env.FROM ?? "02";
+const at = (n) => n >= FROM;
+if (!RESUME) rmSync(CLIPS, { recursive: true, force: true });
 mkdirSync(CLIPS, { recursive: true });
 
 const chrome = spawn(CHROME, [
   "--headless=new", "--disable-gpu", "--hide-scrollbars", `--remote-debugging-port=${PORT}`,
-  "--user-data-dir=/tmp/kirogi-record-profile-" + Date.now(), `--window-size=${W},${H}`, "about:blank",
+  "--user-data-dir=" + (RESUME ?? "/tmp/kirogi-record-profile-" + Date.now()), `--window-size=${W},${H}`, "about:blank",
 ], { stdio: "ignore" });
 
 async function target() {
@@ -118,6 +122,12 @@ await send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceSc
 await send("Page.startScreencast", { format: "jpeg", quality: 92, everyNthFrame: 1 });
 
 try {
+  if (RESUME) {
+    await go("/app");
+    await click("Try the demo without Face ID"); // same device key → same accounts
+    await sleep(2500);
+  }
+  if (at("02")) {
   // 02 — sign in, amount, earmark
   await go("/app");
   await start();
@@ -136,6 +146,7 @@ try {
   await waitText("Jiwoo has it.", 60000);
   await grab("Dad sends $10.00, split into Tuition / Rent / Groceries");
   await stop("03-arrived", 3500);
+  }
 
   // 04 — family pays the grocery store
   await go("/family");

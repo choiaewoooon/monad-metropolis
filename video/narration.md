@@ -14,7 +14,7 @@ One parent earns abroad and sends money home. For tuition, for rent, for food. B
 
 Kirogi lets you send dollars and say what they're for. Face ID, no seed phrase, no gas. Split it three ways: tuition, only at one school. Rent, only to the landlord. Groceries, at any grocery store.
 
-Signed once. Real USDC arrives on Monad in under a second, already split.
+Signed once. Real USDC lands on Monad in seconds, already split.
 
 On the other side, Jiwoo scans the grocery store's code. The contract picks the grocery money, and the shop is paid before she's left the counter.
 

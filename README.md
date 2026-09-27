@@ -51,7 +51,8 @@ The product is a checkout, and a checkout has to feel instant.
   on every payment. That only works as a consumer product if each check is a sub-second, near-free
   transaction — otherwise the enforcement costs more than the purchase.
 - **Receipts are stored on-chain, not reconstructed from logs.** Monad full nodes don't serve arbitrary
-  historic state, so Kirogi keeps each receipt in contract storage and the sender's feed is one view call.
+  historic state (the public testnet RPC caps `eth_getLogs` at 100 blocks), so Kirogi keeps each receipt in
+  contract storage and the sender's feed is one view call.
 - **Declared gas.** Monad charges the declared gas limit, so the relayer declares fixed limits per action
   instead of estimating — which also lets a refused payment be broadcast and recorded.
 
@@ -73,9 +74,9 @@ The product is a checkout, and a checkout has to feel instant.
 - **`contracts/src/Kirogi.sol`** — pockets, rules (`Category` = any merchant registered for the purpose;
   `Payees` = only named payees), `pay` / `payWithSig`, `NotAllowed` refusals, `allowPayee(WithSig)`,
   `reclaim` after expiry, `findPocket` so the shop's QR alone decides which part pays.
-- **`contracts/src/TestUSD.sol`** — a 6-decimal demo dollar with EIP-2612 permit, because Monad testnet has no
-  canonical stablecoin. On mainnet Kirogi is deployed against **AUSD** (`0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a`)
-  or USDC; nothing in Kirogi depends on TestUSD.
+- **`contracts/src/TestUSD.sol`** — used only for local development. On Monad testnet Kirogi runs on **official
+  Circle USDC** (and Agora **AUSD**); on mainnet, AUSD (`0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a`) or USDC. The
+  app reads each token's EIP-712 domain, so permit works for USDC (version "2") and AUSD alike.
 - **`web/`** — Next.js app. `lib/accounts.ts` derives two accounts from one passkey with
   [mera](https://docs.monad.xyz/guides/mera) so one judge can play both sides on one phone;
   `app/api/relay/route.ts` is the gas sponsor (it can only submit what users signed; every call is verified
@@ -85,8 +86,19 @@ The product is a checkout, and a checkout has to feel instant.
 
 | Network | Contract | Address |
 |---|---|---|
-| Monad testnet | Kirogi | _TBD_ |
-| Monad testnet | TestUSD (kUSD) | _TBD_ |
+| Monad testnet | Kirogi | [`0x4B2EABEE3C1FA53f64e6e52aE26a140B71c41b47`](https://testnet.monadvision.com/address/0x4B2EABEE3C1FA53f64e6e52aE26a140B71c41b47) |
+| Monad testnet | Dollar: **Circle USDC** (official) | [`0x534b2f3A21130d7a60830c2Df862319e593943A3`](https://testnet.monadvision.com/address/0x534b2f3A21130d7a60830c2Df862319e593943A3) |
+| Monad testnet | AUSD (Agora, official) — next deployment | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` |
+
+**Recorded demo run (testnet, Circle USDC):**
+
+| What happened | Result | Tx |
+|---|---|---|
+| Dad sends $10.00, split three ways | arrived · 1.8 s | [0x0dc0…24eb](https://testnet.monadvision.com/tx/0x0dc051684f441dfa5af1b4a9376c66ebcaa124b60106c4c55b7a208b447724eb) |
+| Jiwoo pays Westwood Market from Groceries | paid · 0.9 s | [0xf298…10d4](https://testnet.monadvision.com/tx/0xf298d587e2829f0ec0e25ae8f05a8d4942612a538bd545f794cf001b3f8010d4) |
+| Jiwoo tries Neon Arcade with grocery money | **refused: `NotAllowed`** · 0.5 s | [0x76cc…a568](https://testnet.monadvision.com/tx/0x76ccd93ce736babe3faac0b497291d75466b81a2887945b34eb37b41ce30a568) |
+| Dad allows Neon Arcade for that pocket | allowed | [0x3998…3601](https://testnet.monadvision.com/tx/0x3998fc3da865384c63842f20f7daa9eb92dbdaf7a23dd5950a1222a725153601) |
+| Jiwoo pays Neon Arcade again | paid | [0x3e7c…94fa](https://testnet.monadvision.com/tx/0x3e7c7dfa5e3585a546b0661fb5f930842f9df15bdde83709fd4276af22d594fa) |
 
 Demo merchants are fixed addresses derived from labels (`vm.addr(keccak256("kirogi.demo.merchant.westwood-market"))`),
 so the script and the app agree without a config file.
