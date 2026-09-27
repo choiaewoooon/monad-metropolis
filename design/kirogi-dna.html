@@ -13,7 +13,7 @@
   :root{
     --ink:#08090c; --raised:#0f1116; --surface:#14161d; --line:#1d2029; --line-bright:#2a2e3a;
     --text:#f2f4f7; --dim:#9aa2b1; --faint:#626b7b;
-    --send:#8fa6ff; --home:#f0b36b; --pass:#46cf95;
+    --send:#8fa6ff; --home:#f0b36b; --pass:#46cf95; --fail:#ff6b6b;
     --display:"Archivo",-apple-system,sans-serif; --ko:"Pretendard",var(--display); --mono:"JetBrains Mono",ui-monospace,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -82,6 +82,11 @@
   .welcome .img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,6,10,.15) 0%,rgba(5,6,10,0) 35%,rgba(5,6,10,.85) 88%,#05060a 100%)}
   .brand{position:absolute;top:52px;left:22px;z-index:2;display:flex;align-items:center;gap:8px;font-weight:600;letter-spacing:-.03em;font-size:17px}
   .brand img{height:30px}
+
+  .verdict.fail{background:linear-gradient(180deg,color-mix(in oklab,var(--fail) 8%,transparent),transparent 60%),var(--raised)}
+  .pill.fail{color:var(--fail);background:color-mix(in oklab,var(--fail) 13%,transparent);border-color:color-mix(in oklab,var(--fail) 32%,transparent)}
+  .pill.fail .note{color:color-mix(in oklab,var(--fail) 70%,var(--dim))}
+  .ghost{margin:0 16px 10px;height:50px;border-radius:14px;border:1px solid var(--line-bright);color:var(--text);font-size:15px;display:flex;align-items:center;justify-content:center}
   .cap{width:300px;margin-top:16px;color:var(--faint);font-size:12.5px;line-height:1.6}
   .cap b{color:var(--dim);font-weight:500}
 </style>
@@ -164,6 +169,29 @@
   <div class="btn" style="margin-top:auto">Pay</div>
 </div></div>
 <p class="cap"><b>Family side.</b> What's left, split by purpose; the shop's QR decides which part pays.</p></div>
+
+
+<!-- 3b · refused -->
+<div><div class="phone"><div class="scr">
+  <div class="island"></div><div class="sb"><span>9:41</span><span>5G</span></div>
+  <div class="pad">
+    <div class="top"><span class="who"><span class="dot" style="background:var(--send)"></span>From Dad</span></div>
+    <h1 class="display d1" style="margin-top:22px">Not paid.</h1>
+    <p class="lede">This shop isn't one Dad allowed. Your money didn't move.</p>
+    <div class="card verdict fail">
+      <div class="pill fail"><span class="dot" style="background:var(--fail)"></span>Refused by contract<span class="note">0.4 s</span></div>
+      <dl class="kv">
+        <dt>Shop</dt><dd>Neon Arcade</dd>
+        <dt>Tried</dt><dd>$60.00 · Groceries</dd>
+        <dt>Allowed for</dt><dd>none</dd>
+        <dt>Balance</dt><dd>$713.60 unchanged</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="ghost" style="margin-top:auto">Ask Dad to allow it</div>
+  <div class="btn">Done</div>
+</div></div>
+<p class="cap"><b>The rule holds.</b> The earmark is enforced by the contract, not by a promise in the app. This is the screen that answers "why onchain".</p></div>
 
 <!-- 4 · sender sees it land -->
 <div><div class="phone"><div class="scr">
