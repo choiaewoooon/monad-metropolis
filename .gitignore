@@ -10,3 +10,6 @@ broadcast/*/31337/
 contracts/out/
 contracts/cache/
 contracts/broadcast/*/31337/
+video/clips/
+video/out/
+video/audio/
