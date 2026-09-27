@@ -3,7 +3,7 @@
 **International remittance with earmarked spending, on Monad.**
 Send money to family in another country and decide what each dollar is for — tuition, rent, groceries.
 The family pays shops by QR; the contract lets each part pay only where it was meant to, refuses everything
-else on-chain, and settles the shop in under a second. Unspent money comes back after 30 days.
+else on-chain, and the shop's payment is final in about two seconds. Unspent money comes back after 30 days.
 
 Monad Metropolis · **Track 02 — Consumer Products & Payments**
 
@@ -44,9 +44,10 @@ amount is in dollars.
 
 The product is a checkout, and a checkout has to feel instant.
 
-- **Shops are paid in the same moment the customer taps Pay.** Monad's ~300 ms blocks and ~600 ms finality
-  mean the shop's balance changes while the customer is still at the counter — measured and shown in the app
-  (e.g. *Shop was paid · 0.8 s*). Card networks settle to merchants a day or two later.
+- **The shop is paid, final, while the customer is still at the counter.** The payment screen follows Monad's real
+  commitment states (`latest` → `safe` → `finalized` block tags) and stops a stopwatch at Finalized. Measured on
+  testnet: ~2.4 s from tap to final, of which ~0.8 s is block inclusion → finality; the rest is signing and the
+  relayer round trip. Card networks settle to merchants a day or two later.
 - **The rule lives where the money is.** "Only this school", "only grocery stores" is checked by the contract
   on every payment. That only works as a consumer product if each check is a sub-second, near-free
   transaction — otherwise the enforcement costs more than the purchase.
@@ -94,11 +95,11 @@ The product is a checkout, and a checkout has to feel instant.
 
 | What happened | Result | Tx |
 |---|---|---|
-| Dad sends $10.00, split three ways | arrived · 1.8 s | [0x0dc0…24eb](https://testnet.monadvision.com/tx/0x0dc051684f441dfa5af1b4a9376c66ebcaa124b60106c4c55b7a208b447724eb) |
-| Jiwoo pays Westwood Market from Groceries | paid · 0.9 s | [0xf298…10d4](https://testnet.monadvision.com/tx/0xf298d587e2829f0ec0e25ae8f05a8d4942612a538bd545f794cf001b3f8010d4) |
-| Jiwoo tries Neon Arcade with grocery money | **refused: `NotAllowed`** · 0.5 s | [0x76cc…a568](https://testnet.monadvision.com/tx/0x76ccd93ce736babe3faac0b497291d75466b81a2887945b34eb37b41ce30a568) |
-| Dad allows Neon Arcade for that pocket | allowed | [0x3998…3601](https://testnet.monadvision.com/tx/0x3998fc3da865384c63842f20f7daa9eb92dbdaf7a23dd5950a1222a725153601) |
-| Jiwoo pays Neon Arcade again | paid | [0x3e7c…94fa](https://testnet.monadvision.com/tx/0x3e7c7dfa5e3585a546b0661fb5f930842f9df15bdde83709fd4276af22d594fa) |
+| Dad sends $10.00, split three ways | final · 2.4 s | [0x5a96…eae](https://testnet.monadvision.com/tx/0x5a9648aa650976407c5499585da43350d4c582fe4d0981a159aa977640638eae) |
+| Jiwoo pays Westwood Market from Groceries | paid, final · 2.4 s | [0x4a52…368f](https://testnet.monadvision.com/tx/0x4a5266987c5087cdbdeed3855e2b0ae282b41b2cefe2f6a15908ceb369b8368f) |
+| Jiwoo tries Neon Arcade with grocery money | **refused: `NotAllowed`** · 1.0 s | [0x8268…b089](https://testnet.monadvision.com/tx/0x826830e87a94af480c4953429f74fa1f026691a7d0a6725a90e28a80572ab089) |
+| Dad allows Neon Arcade for that pocket | allowed | [0x1d92…9fab](https://testnet.monadvision.com/tx/0x1d927c72078cd7a97b27ad6923b62358c0f5dc0f5da37243cea8712301229fab) |
+| Jiwoo pays Neon Arcade again | paid | [0x56bd…77f1](https://testnet.monadvision.com/tx/0x56bd5f7a08900a09e8538d0baeddcff81a9e3aa6ebc07707bed7bc9d87e077f1) |
 
 Demo merchants are fixed addresses derived from labels (`vm.addr(keccak256("kirogi.demo.merchant.westwood-market"))`),
 so the script and the app agree without a config file.

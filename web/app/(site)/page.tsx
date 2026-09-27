@@ -28,7 +28,7 @@ export default function Landing() {
           <h1 className="d1">Sent abroad.<br />Spent as intended.</h1>
           <p className="lede">
             International remittance with earmarked spending. Send dollars to family in another country, decide what
-            each one is for, and let the contract refuse everything else — while shops are paid in under a second.
+            each one is for, and let the contract refuse everything else — while the shop's payment is final in about two seconds.
           </p>
           <div className="actions">
             <Link href="/app" className="btn primary">Open the app</Link>

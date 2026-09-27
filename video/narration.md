@@ -16,7 +16,7 @@ Kirogi lets you send dollars and say what they're for. Face ID, no seed phrase, 
 
 Signed once. Real USDC lands on Monad in seconds, already split.
 
-On the other side, Jiwoo scans the grocery store's code. The contract picks the grocery money, and the shop is paid before she's left the counter.
+On the other side, Jiwoo scans the grocery store's code. The contract picks the grocery money. About two seconds later the payment is final, before she's left the counter.
 
 Now the arcade. Grocery money can't pay here. And it isn't the app saying no. The contract refuses, on-chain. Her balance doesn't move.
 

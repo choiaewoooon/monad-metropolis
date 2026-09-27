@@ -35,7 +35,7 @@ export default function Welcome() {
           Spent as intended.
         </h1>
         <p className="lede">
-          Send money to family abroad and choose what each dollar is for. Shops are paid in under a second.
+          Send money to family abroad and choose what each dollar is for. Shops are paid, final, in about two seconds.
         </p>
       </div>
       <div className="grow" />
