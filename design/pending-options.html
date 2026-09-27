@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Pending states</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#08090c;--raised:#0f1116;--surface:#14161d;--line:#1d2029;--line-bright:#2a2e3a;--text:#f2f4f7;--dim:#9aa2b1;--faint:#626b7b;--send:#8fa6ff;--home:#f0b36b;--pass:#46cf95;--fail:#ff6b6b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#030406;color:var(--text);font-family:Archivo,sans-serif;-webkit-font-smoothing:antialiased;width:1560px;height:900px;padding:40px;font-variant-numeric:tabular-nums}
+.row{display:flex;gap:40px;justify-content:center}
+.col{width:340px}
+.cap{margin-top:14px;font-size:13px;color:var(--faint);line-height:1.55}.cap b{color:var(--text);font-weight:500;display:block;font-size:15px;margin-bottom:2px}
+.phone{width:340px;height:700px;border-radius:44px;background:#16181e;padding:8px}
+.scr{height:100%;border-radius:37px;background:var(--ink);overflow:hidden;position:relative;padding:58px 22px 0}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--faint)}
+h1{font-size:30px;font-weight:600;letter-spacing:-.035em;line-height:1.05}
+.clock{font-family:'JetBrains Mono',monospace;font-size:64px;font-weight:500;letter-spacing:-.04em;margin-top:26px;line-height:1}
+.clock small{font-size:20px;color:var(--dim);margin-left:6px}
+/* A — millisecond receipt timeline */
+.tl{margin-top:30px;position:relative}
+.tl .st{display:grid;grid-template-columns:18px 1fr auto;gap:12px;align-items:baseline;padding:11px 0;opacity:.28;transition:opacity .2s}
+.tl .st.on{opacity:1}
+.tl .st i{width:10px;height:10px;border-radius:50%;background:var(--line-bright);margin-top:4px;position:relative}
+.tl .st.on i{background:var(--pass)}
+.tl .st.cur i{background:var(--home);box-shadow:0 0 0 0 var(--home);animation:pulse 0.9s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--home) 60%,transparent)}100%{box-shadow:0 0 0 10px transparent}}
+.tl .st b{font-weight:500;font-size:15px}.tl .st .mono{font-size:12px}
+.tl::before{content:"";position:absolute;left:4px;top:22px;bottom:22px;width:2px;background:var(--line)}
+.tl .fill{position:absolute;left:4px;top:22px;width:2px;height:0;background:linear-gradient(180deg,var(--send),var(--home),var(--pass));transition:height .25s}
+.done{margin-top:18px;padding:12px 14px;border-radius:999px;color:var(--pass);background:color-mix(in oklab,var(--pass) 13%,transparent);border:1px solid color-mix(in oklab,var(--pass) 32%,transparent);font-size:14px;display:flex;justify-content:space-between;opacity:0;transform:translateY(8px);transition:all .35s}
+.done.show{opacity:1;transform:none}
+/* B — blocks passing */
+.blocks{display:flex;gap:6px;margin-top:34px;overflow:hidden;height:62px;position:relative}
+.blk{flex:none;width:44px;height:58px;border-radius:9px;border:1px solid var(--line);background:var(--raised);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);transition:all .25s}
+.blk.mine{border-color:var(--pass);background:color-mix(in oklab,var(--pass) 16%,var(--raised));color:var(--pass)}
+.blk.mine::before{content:"";position:absolute}
+.lane{margin-top:26px}
+.bar{height:8px;border-radius:8px;background:var(--line);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:8px}
+.cmp{display:flex;justify-content:space-between;font-size:13px;margin-top:18px}
+/* C — the crossing with a stopwatch */
+.ends{display:flex;justify-content:space-between;margin-top:40px;font-size:14px}
+.ends span{display:flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.wire{height:3px;background:var(--line-bright);border-radius:3px;margin-top:14px;position:relative}
+.wire i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,var(--send),var(--home));width:0}
+.wire b{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--home);box-shadow:0 0 18px var(--home);left:0}
+.stage{margin-top:22px;font-size:15px;color:var(--dim);min-height:22px}
+</style></head><body>
+<div class="row">
+ <!-- A -->
+ <div class="col"><div class="phone"><div class="scr">
+  <div class="mono">To Jiwoo · Westwood Market</div>
+  <h1 style="margin-top:12px">Paying $0.86…</h1>
+  <div class="clock" id="a-clock">0.00<small>s</small></div>
+  <div class="tl" id="a-tl"><span class="fill" id="a-fill"></span>
+   <div class="st"><i></i><b>Signed with Face ID</b><span class="mono" data-t></span></div>
+   <div class="st"><i></i><b>Sent to Monad</b><span class="mono" data-t></span></div>
+   <div class="st"><i></i><b>In block <span id="a-blk">66,123,431</span></b><span class="mono" data-t></span></div>
+   <div class="st"><i></i><b>Final</b><span class="mono" data-t></span></div>
+   <div class="st"><i></i><b>Shop was paid</b><span class="mono" data-t></span></div>
+  </div>
+  <div class="done" id="a-done"><span>● Paid Westwood Market</span><span class="mono" style="color:inherit" id="a-total"></span></div>
+ </div></div>
+ <p class="cap"><b>A · Millisecond receipt</b>Wise's transfer tracker, but the steps are milliseconds apart. A live stopwatch freezes on the real time; every step keeps its timestamp.</p></div>
+
+ <!-- B -->
+ <div class="col"><div class="phone"><div class="scr">
+  <div class="mono">To Jiwoo · Westwood Market</div>
+  <h1 style="margin-top:12px">Paying $0.86…</h1>
+  <div class="clock" id="b-clock">0.00<small>s</small></div>
+  <div class="blocks" id="b-blocks"></div>
+  <div class="mono" style="margin-top:8px" id="b-note">a Monad block every 0.3 s</div>
+  <div class="lane">
+   <div class="cmp"><span>Kirogi on Monad</span><span class="mono" style="color:var(--pass)" id="b-k">…</span></div>
+   <div class="bar"><i id="b-kbar" style="width:0;background:var(--pass)"></i></div>
+   <div class="cmp"><span>Card payout to the shop</span><span class="mono">1–2 days</span></div>
+   <div class="bar"><i style="width:100%;background:var(--line-bright)"></i></div>
+  </div>
+ </div></div>
+ <p class="cap"><b>B · Blocks going by</b>Blocks tick past every 300 ms; yours lights up green. Underneath, the one comparison that matters to a shop: seconds, not days.</p></div>
+
+ <!-- C -->
+ <div class="col"><div class="phone"><div class="scr">
+  <div class="mono">To Jiwoo · Westwood Market</div>
+  <h1 style="margin-top:12px">Paying $0.86…</h1>
+  <div class="clock" id="c-clock">0.00<small>s</small></div>
+  <div class="ends"><span><i class="dot" style="background:var(--home)"></i>Jiwoo</span><span><i class="dot" style="background:var(--pass)"></i>Westwood Market</span></div>
+  <div class="wire"><i id="c-fill"></i><b id="c-dot"></b></div>
+  <div class="stage" id="c-stage">Signing…</div>
+ </div></div>
+ <p class="cap"><b>C · The crossing, timed</b>Kirogi's signature line, now driven by the real stages: the dollar travels from her to the shop and the stopwatch stops when it lands.</p></div>
+</div>
+<script>
+// simulated with the measured testnet shape: sign 0, submit 110 ms, block 420 ms, final 720 ms, paid 860 ms
+const STAGES=[0,110,420,720,860], END=860, LOOP=4200;
+const fmt=ms=>(ms/1000).toFixed(2);
+const aSt=[...document.querySelectorAll('#a-tl .st')];
+let blocks=document.getElementById('b-blocks'), bn=66123420;
+for(let i=0;i<9;i++){const d=document.createElement('div');d.className='blk';d.textContent='…'+(bn+i)%1000;blocks.appendChild(d);}
+let t0=performance.now(), lastBlock=0, mine=false;
+function frame(now){
+  const t=(now-t0)%LOOP, e=Math.min(t,END);
+  if(t<30){mine=false;}
+  for(const id of ['a','b','c']) document.getElementById(id+'-clock').innerHTML=fmt(e)+'<small>s</small>';
+  // A
+  let reached=STAGES.filter(s=>t>=s).length;
+  aSt.forEach((s,i)=>{s.classList.toggle('on',i<reached);s.classList.toggle('cur',i===reached&&t<END);s.querySelector('[data-t]').textContent=i<reached?fmt(STAGES[i])+' s':'';});
+  document.getElementById('a-fill').style.height=Math.min(1,(reached-1)/4)*(aSt.length-1)*44+'px';
+  const ad=document.getElementById('a-done');ad.classList.toggle('show',t>=END);document.getElementById('a-total').textContent=fmt(END)+' s';
+  // B: blocks slide every 300ms, tx lands in the block at 420ms
+  if(now-lastBlock>300){lastBlock=now;blocks.firstChild.remove();bn++;const d=document.createElement('div');d.className='blk';d.textContent='…'+(bn+8)%1000;
+    if(!mine&&t>=STAGES[2]&&t<STAGES[2]+400){d.classList.add('mine');d.textContent='yours';mine=true;} blocks.appendChild(d);}
+  document.getElementById('b-k').textContent=t>=END?fmt(END)+' s':'…';document.getElementById('b-kbar').style.width=(t>=END?1.2:(e/END)*1.2)+'%';
+  // C
+  const k=e/END, cf=document.getElementById('c-fill'), cd=document.getElementById('c-dot');
+  cf.style.width=(k*100)+'%';cd.style.left=(k*100)+'%';cd.style.background=t>=END?'var(--pass)':'var(--home)';cd.style.boxShadow=t>=END?'0 0 18px var(--pass)':'0 0 18px var(--home)';
+  document.getElementById('c-stage').textContent=t<110?'Signing with Face ID…':t<420?'Sent to Monad…':t<720?'In block '+(66123431).toLocaleString('en-US')+'…':t<END?'Final…':'Westwood Market has it.';
+  document.getElementById('c-stage').style.color=t>=END?'var(--pass)':'var(--dim)';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body></html>
