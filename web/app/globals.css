@@ -122,3 +122,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .brand { position: absolute; top: 22px; left: 22px; z-index: 2; display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: -0.03em; font-size: 18px; }
 .brand img { height: 32px; width: auto; }
 .error { color: var(--fail); font-size: 13px; margin-top: 10px; }
+
+.nudge { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--line-bright); color: var(--dim); font-size: 18px; line-height: 1; }
+.nudge:active { background: var(--surface); }

@@ -123,9 +123,9 @@ export default function Send() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                   <span style={{ fontSize: 16 }}>{r.label}</span>
                   <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <button className="mono" aria-label={`Less for ${r.label}`} onClick={() => nudge(i, -STEP)}>−</button>
+                    <button className="nudge" aria-label={`Less for ${r.label}`} onClick={() => nudge(i, -STEP)}>−</button>
                     <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em", minWidth: 72, textAlign: "right" }}>{fmt(r.amount, false)}</span>
-                    <button className="mono" aria-label={`More for ${r.label}`} onClick={() => nudge(i, STEP)}>+</button>
+                    <button className="nudge" aria-label={`More for ${r.label}`} onClick={() => nudge(i, STEP)}>+</button>
                   </span>
                 </div>
                 <div className="mono" style={{ marginTop: 5 }}>{r.note}</div>
